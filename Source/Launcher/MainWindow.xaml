@@ -1,0 +1,86 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:StringResources="clr-namespace:Syndic.ImageComparer.Launcher.Properties"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="Syndic.ImageComparer.Launcher.MainWindow"
+        Title="Image Comparer" Height="807.575" Width="1053" AllowsTransparency="True" WindowStyle="None" Background="Transparent" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid>
+    	<Grid.RowDefinitions>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition/>
+    	</Grid.RowDefinitions>
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition/>
+    		<ColumnDefinition Width="2*"/>
+    		<ColumnDefinition/>
+    	</Grid.ColumnDefinitions>
+    	<Border BorderThickness="15" Margin="24,24,24,22.854" CornerRadius="8" Background="#FF333332" Grid.Column="1" BorderBrush="#FF00015C">
+    		<Border BorderThickness="4" Margin="-3" CornerRadius="8" Background="#FF333333" Grid.Column="1" Grid.RowSpan="2" BorderBrush="#FF333333">
+	    		<StackPanel Margin="4">
+	                <TextBlock Margin="4" TextWrapping="Wrap" Text="{x:Static StringResources:Resources.Launcher_Instructions}" FontSize="18.667" FontStyle="Italic" Foreground="#FF658BF1"/>
+	                <Grid Height="52" Margin="4" >
+	                	<Grid.ColumnDefinitions>
+	                		<ColumnDefinition/>
+	                		<ColumnDefinition Width="Auto"/>
+	                	</Grid.ColumnDefinitions>
+	                	<TextBox x:Name="ImageFolderPathTextBox" Margin="2,2,0,2" TextWrapping="Wrap" VerticalContentAlignment="Center" FontSize="14.667" Text="Directory" Foreground="#FF658BF1"/>
+                        <Button Content="..." Margin="2" Grid.Column="1" Width="32" Height="32" Click="browseForFolderButton_Click"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Begin Scan" Height="40" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="125" FontSize="14.667" Command="{Binding Path=BeginScanCommand}" CommandParameter="{Binding Path=Text, ElementName=ImageFolderPathTextBox}"/>
+                        <Button Content="Export To List" Height="40" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="125" FontSize="14.667" Command="{Binding Path=ExportToListCommand}" CommandParameter="{Binding Path=DisplayList}"/>
+                    </StackPanel>
+                </StackPanel>
+			</Border>
+    	</Border>
+    	<Image HorizontalAlignment="Right" Height="32" Margin="0" Source="Images/Stop.png" Stretch="Fill" VerticalAlignment="Top" Width="32" MouseLeftButtonDown="Image_MouseLeftButtonDown" Grid.Column="1"/>
+    	<Border BorderThickness="15" Margin="24" CornerRadius="8" Background="#FF333332" Grid.RowSpan="2" BorderBrush="#FF00015C" Grid.Row="2" Grid.ColumnSpan="3">
+    		<Border.Style>
+    			<Style>
+    				<Style.Triggers>
+    					<DataTrigger Binding="{Binding Path=DisplayList.Count}" Value="0">
+    						<Setter Property="Border.Visibility" Value="Hidden"/>
+						</DataTrigger>			
+					</Style.Triggers>			
+				</Style> 		
+			</Border.Style>
+    		<Border BorderThickness="4" Margin="-3" CornerRadius="8" Background="#FF333333" Grid.Column="1" Grid.RowSpan="2" BorderBrush="#FF333333">
+    			<StackPanel Orientation="Horizontal">
+	    			<Border Width="225" BorderThickness="4" Margin="4" CornerRadius="8" Background="Gray" Grid.Column="1" Grid.RowSpan="2" BorderBrush="Gray" HorizontalAlignment="Left">
+		    			<ListBox x:Name="SourceListBox" ItemsSource="{Binding Path=DisplayList}"  Background="Gray" BorderBrush="#FF333333" HorizontalAlignment="Left" BorderThickness="0">
+		    				<ListBox.ItemTemplate>
+		    				<DataTemplate>
+		    					<Border BorderBrush="#FF00015C" BorderThickness="2" Background="#FF5A808D" Width="190" Height="150" Margin="2" CornerRadius="8">
+			    					<StackPanel Margin="2" Orientation="Vertical">
+			    						<TextBlock Text="{Binding Path=Description}" Margin="2"/>
+			    						<Image Source="{Binding Path=Path}" Margin="2" Stretch="Uniform" Width="245" Height="115"/>
+									</StackPanel>
+								</Border>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+		    			</ListBox>
+                    </Border>
+                    <Border BorderThickness="4" Margin="4" CornerRadius="8" Background="Gray" Grid.Column="2" Grid.RowSpan="2" BorderBrush="Gray" Width="733">
+                        <ListBox ItemsSource="{Binding Path=SelectedItem.MatchingImages, ElementName=SourceListBox}" Background="Gray">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel IsItemsHost="True"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#FF00015C" BorderThickness="2" Background="#FF5A808D" Width="190" Height="150" Margin="2" CornerRadius="8">
+                                        <StackPanel Margin="2" Orientation="Vertical">
+                                            <CheckBox IsChecked="{Binding Path=ShouldDelete}" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                            <Image Height="100" Width="100" Source="{Binding Path=Path}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+				</StackPanel>
+    		</Border>
+    	</Border>        
+    </Grid>
+</Window>
