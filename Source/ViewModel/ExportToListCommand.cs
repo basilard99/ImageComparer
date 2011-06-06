@@ -31,6 +31,9 @@ namespace Syndic.ImageComparer.ViewModel
         public void Execute(Object parameter)
         {
 
+            Contract.Requires(parameter != null);
+            Contract.Requires(parameter is List<SourceImageFile>);
+
             List<SourceImageFile> fileList = (List<SourceImageFile>)parameter;
             StringBuilder sb = new StringBuilder();
 
