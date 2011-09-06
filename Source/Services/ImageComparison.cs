@@ -31,26 +31,25 @@ namespace Syndic.ImageComparer.Services
         public Dictionary<FileInfo, ReadOnlyCollection<FileInfo>> Compare(ReadOnlyCollection<FileInfo> imageList)
         {
 
-            // Create the dictionary
-            return (imageList
-                .Where(f => f.Extension == ".jpg")
-                .GroupBy(f => f.Length)
-                .Where(g => g.Count() > 1)
-                .Where(grouping => grouping.Count() > 1)
-                .Select(grouping => grouping
-                    .OrderBy(fileInfo => fileInfo.Name)
-                    .ToList()
-                )
-            ).ToDictionary(
-                sortedGrouping => sortedGrouping.First(),
-                sortedGrouping => new ReadOnlyCollection<FileInfo>(
-                    doByteComparison(
-                        sortedGrouping.First(),
-                        sortedGrouping.Skip(1)
-                        .ToList()
-                    )
-                )
-            );
+            Dictionary<FileInfo, ReadOnlyCollection<FileInfo>> results = new Dictionary<FileInfo, ReadOnlyCollection<FileInfo>>();
+
+            var comparisonList = imageList.Where(f => f.Extension.ToLower() == ".jpg").GroupBy(f => f.Length).Where(g => g.Count() > 1);
+            foreach (var grouping in comparisonList)
+            {
+                var images = grouping.Select(c => new ComparisonTracker { HasBeenCompared = false, Source = c }).ToArray();
+                for (int index = 0; index < images.Count(); index++)
+                {
+                    if (images[index].HasBeenCompared) continue;
+                    images[index].HasBeenCompared = true;
+                    List<FileInfo> matches = doByteComparison(images[index].Source, images.Where(c => c.HasBeenCompared == false));
+                    if (matches.Count() > 0)
+                    {
+                        results.Add(images[index].Source, new ReadOnlyCollection<FileInfo>(matches));
+                    }
+                }
+            }
+
+            return results;
 
         }  
 
@@ -63,20 +62,19 @@ namespace Syndic.ImageComparer.Services
         /// <summary>
         /// Compares the files byte by byte.
         /// </summary>
-        private List<FileInfo> doByteComparison(FileInfo source, IEnumerable<FileInfo> toList)
+        private List<FileInfo> doByteComparison(FileInfo source, IEnumerable<ComparisonTracker> toList)
         {
 
             List<FileInfo> matches = new List<FileInfo>();
 
             Byte[] sourceBytes = readBytesFromSourceFile(source);
 
-
-            foreach (FileInfo fileInfo in toList)
+            foreach (ComparisonTracker tracker in toList)
             {
 
                 Int32 counter = 0;
                 Boolean bytesMatch = true;
-                FileStream comparisonStream = fileInfo.OpenRead();
+                FileStream comparisonStream = tracker.Source.OpenRead();
 
                 do
                 {
@@ -86,7 +84,11 @@ namespace Syndic.ImageComparer.Services
 
                 comparisonStream.Close();
 
-                if (bytesMatch) matches.Add(fileInfo);
+                if (bytesMatch)
+                {
+                    tracker.HasBeenCompared = true;
+                    matches.Add(tracker.Source);
+                }
 
             }
 
@@ -111,6 +113,19 @@ namespace Syndic.ImageComparer.Services
         } 
 
         #endregion PRIVATE METHODS
+
+        #region [-- PRIVATE FIELDS --]
+
+        /// <summary>
+        /// Private class used for tracking comparisons.
+        /// </summary>
+        private class ComparisonTracker
+        {
+            public FileInfo Source { get; set; }
+            public Boolean HasBeenCompared { get; set; }
+        } 
+
+        #endregion PRIVATE FIELDS
     
     }
 

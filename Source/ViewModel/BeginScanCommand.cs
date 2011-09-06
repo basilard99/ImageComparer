@@ -69,7 +69,7 @@ namespace Syndic.ImageComparer.ViewModel
                             {
                                 Description = elem.Name, 
                                 Path = elem.FullName, 
-                                ShouldDelete = false
+                                ShouldDelete = true
                             }
                         ))
                     }
